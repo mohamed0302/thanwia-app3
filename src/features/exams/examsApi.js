@@ -1,7 +1,8 @@
 /**
- * الامتحانات — جلب حسب صف الطالب. مصدر أول: السيرفر (Firebase)، ثم Supabase، ثم تجريبي.
+ * الامتحانات — جلب حسب صف الطالب. مصدر: Firebase أولاً، ثم Supabase، ثم تجريبي.
  */
-import { api } from '../../lib/api'
+import { get } from 'firebase/database'
+import { isFirebaseConfigured, getExamsRef } from '../../lib/firebase'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 
 const CACHE_KEY = 'finapp_exams'
@@ -31,14 +32,17 @@ export async function fetchExamsByGrade(grade) {
   const cached = getCached(grade)
   if (cached) return cached
 
-  const token = localStorage.getItem('finapp_token')
-  if (token && token !== 'guest-token') {
+  if (isFirebaseConfigured) {
     try {
-      const res = await api.get(`/exams?grade=${encodeURIComponent(grade)}`)
-      const list = res.data?.exams || []
-      if (list.length > 0) {
-        setCache(grade, list)
-        return list
+      const examRef = getExamsRef(grade)
+      if (examRef) {
+        const snap = await get(examRef)
+        const val = snap.val()
+        const list = val ? Object.entries(val).map(([id, v]) => ({ id, title: v.title || '', url: v.url || '', grade })) : []
+        if (list.length > 0) {
+          setCache(grade, list)
+          return list
+        }
       }
     } catch (_) {}
   }

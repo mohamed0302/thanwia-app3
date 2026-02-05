@@ -26,3 +26,11 @@ export async function getVapidKey() {
   const c = await getConfig()
   return c.firebaseVapidKey || import.meta.env.VITE_FIREBASE_VAPID_KEY || ''
 }
+
+export async function getTeacherCredentials() {
+  const c = await getConfig()
+  return {
+    email: (c.teacherEmail || 'teacher@test.com').trim().toLowerCase(),
+    password: c.teacherPassword || '123456',
+  }
+}

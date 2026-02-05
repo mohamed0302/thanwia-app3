@@ -1,5 +1,6 @@
 {
   "apiUrl": "",
-  "firebaseVapidKey": "GelHL6c8lO4gxKuhm3CEPiWA22GxiMAnzArjNacKkXk"
+  "firebaseVapidKey": "GelHL6c8lO4gxKuhm3CEPiWA22GxiMAnzArjNacKkXk",
+  "teacherEmail": "teacher@test.com",
+  "teacherPassword": "123456"
 }
-

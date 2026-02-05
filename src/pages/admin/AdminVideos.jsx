@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchVideos, addVideo, deleteVideo } from '../../features/admin/firebaseAdminApi'
+import { api } from '../../lib/api'
+import { getAdminErrorMessage } from '../../lib/adminError'
 
 const GRADES = [
   { value: '1st_secondary', label: 'أولى ثانوي' },
@@ -18,9 +19,9 @@ export default function AdminVideos() {
   const load = () => {
     setLoading(true)
     setError('')
-    fetchVideos(grade)
-      .then(setVideos)
-      .catch((e) => setError(e.message || 'تعذر التحميل'))
+    api.get(`/admin/videos?grade=${grade}`)
+      .then((r) => setVideos(r.data.videos || []))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setLoading(false))
   }
 
@@ -34,20 +35,20 @@ export default function AdminVideos() {
     }
     setAdding(true)
     setError('')
-    addVideo(grade, { title: form.title.trim(), video_url: form.video_url.trim(), subject: form.subject.trim() })
+    api.post('/admin/videos', { grade, title: form.title.trim(), video_url: form.video_url.trim(), subject: form.subject.trim() })
       .then(() => {
         setForm({ title: '', video_url: '', subject: '' })
         load()
       })
-      .catch((e) => setError(e.message || 'تعذر الإضافة'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setAdding(false))
   }
 
   const handleDelete = (id) => {
     if (!confirm('حذف هذا الفيديو؟')) return
-    deleteVideo(grade, id)
+    api.delete(`/admin/videos/${id}?grade=${grade}`)
       .then(load)
-      .catch((e) => setError(e.message || 'تعذر الحذف'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
   }
 
   return (

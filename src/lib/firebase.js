@@ -4,8 +4,7 @@
  * استخدم إعدادات تطبيق الويب من Firebase Console (لا تضع service account في الويب).
  */
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getDatabase, ref, get, set, push, remove, onValue } from 'firebase/database'
+import { getDatabase, ref } from 'firebase/database'
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? 'AIzaSyCI55J747ym_OPI5mrLyTtRxPrSCMXoD3Y',
@@ -29,7 +28,6 @@ if (hasConfig) {
 
 export const isFirebaseConfigured = Boolean(hasConfig && database)
 export { app }
-export const auth = hasConfig && app ? getAuth(app) : null
 
 export function getDb() {
   return database
@@ -50,16 +48,4 @@ export function getStudentChildRef(studentCode, childKey) {
 export function getVideosRef(grade) {
   if (!database || !grade) return null
   return ref(database, `videos/${grade}`)
-}
-
-/** مسار امتحانات صف معيّن */
-export function getExamsRef(grade) {
-  if (!database || !grade) return null
-  return ref(database, `exams/${grade}`)
-}
-
-/** مسار الأدمنز — للتأكد من أن المستخدم مدرس */
-export function getAdminsRef() {
-  if (!database) return null
-  return ref(database, 'admins')
 }

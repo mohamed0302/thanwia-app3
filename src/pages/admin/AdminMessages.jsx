@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { fetchStudentMessages, addMessage, deleteMessage as deleteMessageApi } from '../../features/admin/firebaseAdminApi'
+import { api } from '../../lib/api'
+import { getAdminErrorMessage } from '../../lib/adminError'
 
 const TYPE_LABELS = { grade: 'درجات', absence: 'غياب وحضور', message: 'تقارير أو ملاحظات طارئة' }
 
@@ -170,17 +171,18 @@ export default function AdminMessages() {
     setLoading(true)
     setError('')
     setData(null)
-    fetchStudentMessages(c)
-      .then(setData)
-      .catch((e) => setError(e.message || 'تعذر التحميل'))
+    api.get(`/admin/messages/${encodeURIComponent(c)}`)
+      .then((r) => setData(r.data))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setLoading(false))
   }
 
   const deleteMessage = (studentCode, type, messageId) => {
     if (!confirm('حذف هذه الرسالة؟')) return
-    deleteMessageApi(studentCode, type, messageId)
+    const pathType = type === 'grade' ? 'grade' : type === 'absence' ? 'absence' : 'message'
+    api.delete(`/admin/messages/${encodeURIComponent(studentCode)}/${pathType}/${messageId}`)
       .then(() => fetchMessages())
-      .catch((e) => setError(e.message || 'تعذر الحذف'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
   }
 
   const handleAddMessage = (e) => {
@@ -194,13 +196,13 @@ export default function AdminMessages() {
     setAdding(true)
     setError('')
     setAddSuccess('')
-    addMessage(c, addForm.type, text)
+    api.post('/admin/messages/add', { studentCode: c, type: addForm.type, text })
       .then(() => {
-        setAddSuccess('تم إرسال الرسالة.')
+        setAddSuccess('تم إرسال الرسالة وسيستلم الطالب إشعاراً إن كان مفعّلاً.')
         setAddForm((f) => ({ ...f, text: '' }))
         if (code === c) fetchMessages()
       })
-      .catch((e) => setError(e.message || 'تعذر الإرسال'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setAdding(false))
   }
 

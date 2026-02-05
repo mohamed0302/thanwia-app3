@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchExams, addExam, deleteExam } from '../../features/admin/firebaseAdminApi'
+import { api } from '../../lib/api'
+import { getAdminErrorMessage } from '../../lib/adminError'
 
 const GRADES = [
   { value: '1st_secondary', label: 'أولى ثانوي' },
@@ -18,9 +19,9 @@ export default function AdminExams() {
   const load = () => {
     setLoading(true)
     setError('')
-    fetchExams(grade)
-      .then(setExams)
-      .catch((e) => setError(e.message || 'تعذر التحميل'))
+    api.get(`/admin/exams?grade=${grade}`)
+      .then((r) => setExams(r.data.exams || []))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setLoading(false))
   }
 
@@ -34,20 +35,20 @@ export default function AdminExams() {
     }
     setAdding(true)
     setError('')
-    addExam(grade, { title: form.title.trim(), url: form.url.trim() })
+    api.post('/admin/exams', { grade, title: form.title.trim(), url: form.url.trim() })
       .then(() => {
         setForm({ title: '', url: '' })
         load()
       })
-      .catch((e) => setError(e.message || 'تعذر الإضافة'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
       .finally(() => setAdding(false))
   }
 
   const handleDelete = (id) => {
     if (!confirm('حذف هذا الامتحان؟')) return
-    deleteExam(grade, id)
+    api.delete(`/admin/exams/${id}?grade=${grade}`)
       .then(load)
-      .catch((e) => setError(e.message || 'تعذر الحذف'))
+      .catch((e) => setError(getAdminErrorMessage(e)))
   }
 
   return (

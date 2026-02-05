@@ -18,8 +18,8 @@ function Layout({ children }) {
   const title = titles[pathname] || APP_NAME
 
   useEffect(() => {
-    if (user?.role === 'student' && user?.id) askNotificationPermissionOnce(user.id)
-  }, [user?.role, user?.id])
+    if (user?.role === 'student') askNotificationPermissionOnce()
+  }, [user?.role])
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">

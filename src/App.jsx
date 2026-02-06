@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import InstallBanner from './components/InstallBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import Layout from './components/Layout'
@@ -48,6 +49,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <InstallBanner />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

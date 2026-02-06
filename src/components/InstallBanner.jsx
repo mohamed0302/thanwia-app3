@@ -3,6 +3,7 @@
  * يظهر عند فتح الموقع ويتيح تثبيت التطبيق عبر beforeinstallprompt
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useInstall } from '../context/InstallContext'
 
 const DISMISSED_KEY = 'pwa-install-banner-dismissed'
 const DISMISS_DURATION_DAYS = 7
@@ -19,38 +20,6 @@ function useIsMobile() {
   }, [])
 
   return isMobile
-}
-
-function useIsStandalone() {
-  const [isStandalone, setIsStandalone] = useState(false)
-
-  useEffect(() => {
-    setIsStandalone(
-      window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true ||
-        document.referrer.includes('android-app://')
-    )
-  }, [])
-
-  return isStandalone
-}
-
-function useBeforeInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null)
-  const [isSupported, setIsSupported] = useState(false)
-
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-      setIsSupported(true)
-    }
-
-    window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
-
-  return { deferredPrompt, isSupported }
 }
 
 function wasDismissedRecently() {
@@ -74,8 +43,7 @@ function InstallBanner() {
   const [showBanner, setShowBanner] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
   const isMobile = useIsMobile()
-  const isStandalone = useIsStandalone()
-  const { deferredPrompt, isSupported } = useBeforeInstallPrompt()
+  const { canInstall, install, isStandalone } = useInstall()
 
   const hideBanner = useCallback(() => {
     setIsExiting(true)
@@ -87,18 +55,11 @@ function InstallBanner() {
   }, [])
 
   const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) {
-      hideBanner()
-      return
-    }
-    try {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted' || outcome === 'dismissed') hideBanner()
-    } catch {
+    const { outcome } = await install()
+    if (['accepted', 'dismissed', 'unsupported', 'error'].includes(outcome)) {
       hideBanner()
     }
-  }, [deferredPrompt, hideBanner])
+  }, [install, hideBanner])
 
   useEffect(() => {
     if (!isMobile || isStandalone || wasDismissedRecently()) return
@@ -107,8 +68,7 @@ function InstallBanner() {
     return () => clearTimeout(t)
   }, [isMobile, isStandalone])
 
-  // On iOS/unsupported: still show banner but hide install button or show fallback
-  const showInstallButton = isSupported || true // Show always; on unsupported, click will just dismiss
+  const showInstallButton = canInstall || true
 
   if (!showBanner) return null
 

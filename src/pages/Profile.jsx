@@ -3,13 +3,24 @@
  * Student: name, grade, student_code, avatar placeholder.
  * Guest: limited view.
  */
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useInstall } from '../context/InstallContext'
 import { APP_NAME, DEVELOPER } from '../lib/branding'
 
 export default function Profile() {
   const { user } = useAuth()
+  const { canInstall, install } = useInstall()
+  const [installing, setInstalling] = useState(false)
   const isStudent = user?.role === 'student'
   const isGuest = user?.role === 'guest'
+
+  const handleInstall = async () => {
+    if (!canInstall) return
+    setInstalling(true)
+    await install()
+    setInstalling(false)
+  }
 
   return (
     <div className="space-y-6">
@@ -56,6 +67,19 @@ export default function Profile() {
       <section className="rounded-2xl bg-slate-100/80 border border-slate-200 p-5">
         <h2 className="text-slate-700 text-sm font-semibold mb-3">معلومات التطبيق</h2>
         <p className="text-slate-600 text-sm mb-4">{APP_NAME} — تطبيق موبايل للمدرس والطلبة</p>
+
+        {canInstall && (
+          <button
+            type="button"
+            onClick={handleInstall}
+            disabled={installing}
+            className="w-full mb-4 py-3 px-5 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 active:scale-[0.98] transition-all shadow-sm hover:shadow disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2"
+          >
+            <span>⬇️</span>
+            <span>{installing ? 'جاري التثبيت...' : 'نزّل التطبيق على الهاتف'}</span>
+          </button>
+        )}
+
         <div className="rounded-xl bg-white border border-slate-200 p-4 space-y-2">
           <h3 className="text-slate-800 font-bold text-base">المبرمج: {DEVELOPER.name}</h3>
           <p className="text-slate-600 text-sm">مطوّر التطبيق بالكامل</p>

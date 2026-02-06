@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { InstallProvider } from './context/InstallContext'
 import InstallBanner from './components/InstallBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
@@ -48,9 +49,10 @@ function AppLayout() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <InstallBanner />
-        <Routes>
+      <InstallProvider>
+        <BrowserRouter>
+          <InstallBanner />
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<AdminDashboard />} />
@@ -68,8 +70,9 @@ function App() {
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </InstallProvider>
     </AuthProvider>
   )
 }

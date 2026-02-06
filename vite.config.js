@@ -7,7 +7,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      manifest: true,
+      manifest: {
+        name: 'البسيط',
+        short_name: 'البسيط',
+        theme_color: '#14b8a6',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/login',
+        lang: 'ar',
+        dir: 'rtl',
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ],
+      },
       workbox: {
         runtimeCaching: [
           {

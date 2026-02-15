@@ -49,3 +49,9 @@ export function getVideosRef(grade) {
   if (!database || !grade) return null
   return ref(database, `videos/${grade}`)
 }
+
+/** مسار امتحانات صف معيّن (للقراءة في تطبيق الطالب) */
+export function getExamsRef(grade) {
+  if (!database || !grade) return null
+  return ref(database, `exams/${grade}`)
+}
